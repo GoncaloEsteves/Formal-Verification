@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="1" name="Z3" version="4.8.6" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Alt-Ergo" version="2.3.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml" proved="true">
+<path name=".."/><path name="programs-lab3.mlw"/>
+<theory name="Bintree_insert" proved="true">
+ <goal name="size&#39;vc" expl="VC for size" proved="true">
+ <proof prover="0"><result status="valid" time="0.14" steps="8053"/></proof>
+ </goal>
+ <goal name="add&#39;vc" expl="VC for add" proved="true">
+ <proof prover="0"><result status="valid" time="0.25" steps="39686"/></proof>
+ </goal>
+ <goal name="inorderAux&#39;vc" expl="VC for inorderAux" proved="true">
+ <transf name="split_all_full" proved="true" >
+  <goal name="inorderAux&#39;vc.0" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.04" steps="10067"/></proof>
+  </goal>
+  <goal name="inorderAux&#39;vc.1" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.11" steps="13686"/></proof>
+  </goal>
+  <goal name="inorderAux&#39;vc.2" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.04" steps="10624"/></proof>
+  </goal>
+  <goal name="inorderAux&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="9925"/></proof>
+  </goal>
+  <goal name="inorderAux&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="11428"/></proof>
+  </goal>
+  <goal name="inorderAux&#39;vc.5" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="11329"/></proof>
+  </goal>
+  <goal name="inorderAux&#39;vc.6" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="14659"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="inorder&#39;vc" expl="VC for inorder" proved="true">
+ <transf name="split_all_full" proved="true" >
+  <goal name="inorder&#39;vc.0" expl="precondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.04" steps="9322"/></proof>
+  </goal>
+  <goal name="inorder&#39;vc.1" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="9885"/></proof>
+  </goal>
+  <goal name="inorder&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="11770"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="leq_list&#39;vc" expl="VC for leq_list" proved="true">
+ <transf name="split_all_full" proved="true" >
+  <goal name="leq_list&#39;vc.0" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.09" steps="14462"/></proof>
+  </goal>
+  <goal name="leq_list&#39;vc.1" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.14" steps="14460"/></proof>
+  </goal>
+  <goal name="leq_list&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="11592"/></proof>
+  </goal>
+  <goal name="leq_list&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="11222"/></proof>
+  </goal>
+  <goal name="leq_list&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.11" steps="16216"/></proof>
+  </goal>
+  <goal name="leq_list&#39;vc.5" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.11" steps="14262"/></proof>
+  </goal>
+  <goal name="leq_list&#39;vc.6" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.06" steps="13310"/></proof>
+  </goal>
+  <goal name="leq_list&#39;vc.7" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.06" steps="13725"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="g_list&#39;vc" expl="VC for g_list" proved="true">
+ <transf name="split_all_full" proved="true" >
+  <goal name="g_list&#39;vc.0" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="14791"/></proof>
+  </goal>
+  <goal name="g_list&#39;vc.1" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.13" steps="14802"/></proof>
+  </goal>
+  <goal name="g_list&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="11947"/></proof>
+  </goal>
+  <goal name="g_list&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="11540"/></proof>
+  </goal>
+  <goal name="g_list&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.12" steps="16579"/></proof>
+  </goal>
+  <goal name="g_list&#39;vc.5" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.09" steps="14595"/></proof>
+  </goal>
+  <goal name="g_list&#39;vc.6" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.06" steps="13645"/></proof>
+  </goal>
+  <goal name="g_list&#39;vc.7" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="14055"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="partition&#39;vc" expl="VC for partition" proved="true">
+ <transf name="split_all_full" proved="true" >
+  <goal name="partition&#39;vc.0" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="15091"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.1" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="11690"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="12430"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="12670"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="1.00" steps="1034534"/></proof>
+  <proof prover="2" obsolete="true"><result status="highfailure" time="0.00"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="12858"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.5" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="12386"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.6" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.09" steps="15888"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.7" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.15" steps="15314"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.8" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.10" steps="18760"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.9" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.13" steps="16526"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.10" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.10" steps="16436"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.11" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="15880"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.12" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.13" steps="18574"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.13" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.11" steps="15431"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.14" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.10" steps="16509"/></proof>
+  </goal>
+  <goal name="partition&#39;vc.15" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.10" steps="16423"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="inorder2&#39;vc" expl="VC for inorder2" proved="true">
+ <transf name="split_all_full" proved="true" >
+  <goal name="inorder2&#39;vc.0" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.10" steps="17909"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="1.00" steps="629113"/></proof>
+  <proof prover="2" obsolete="true"><result status="highfailure" time="0.00"/></proof>
+  </goal>
+  <goal name="inorder2&#39;vc.1" expl="variant decrease" proved="true">
+  <proof prover="0"><result status="valid" time="0.16" steps="18532"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="1.00" steps="627392"/></proof>
+  <proof prover="2" obsolete="true"><result status="highfailure" time="0.01"/></proof>
+  </goal>
+  <goal name="inorder2&#39;vc.2" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="13604"/></proof>
+  </goal>
+  <goal name="inorder2&#39;vc.3" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="14926"/></proof>
+  </goal>
+  <goal name="inorder2&#39;vc.4" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.12" steps="15328"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="1.00" steps="1258943"/></proof>
+  <proof prover="2" obsolete="true"><result status="highfailure" time="0.00"/></proof>
+  </goal>
+  <goal name="inorder2&#39;vc.5" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.15" steps="26838"/></proof>
+  </goal>
+  <goal name="inorder2&#39;vc.6" expl="postcondition" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="24089"/></proof>
+  </goal>
+  <goal name="inorder2&#39;vc.7" expl="postcondition" proved="true">
+  <transf name="split_all_full" proved="true" >
+   <goal name="inorder2&#39;vc.7.0" expl="postcondition" proved="true">
+   <proof prover="0"><result status="valid" time="0.12" steps="23143"/></proof>
+   </goal>
+   <goal name="inorder2&#39;vc.7.1" expl="postcondition" proved="true">
+   <transf name="split_vc" proved="true" >
+    <goal name="inorder2&#39;vc.7.1.0" expl="postcondition" proved="true">
+    <proof prover="0"><result status="valid" time="0.19" steps="20638"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

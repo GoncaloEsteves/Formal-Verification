@@ -1,0 +1,185 @@
+module Bintree_insert
+  
+  use int.Int
+  use list.List
+  use list.Mem
+  use list.SortedInt
+  use list.Permut
+  use list.Length
+  use list.NumOcc 
+
+  type tree 'a = Empty | Node (tree 'a) 'a (tree 'a)
+
+  (* Função que calcula o número de elementos de uma árvore *)
+  let rec function size (t: tree 'a) : int
+    ensures { result >= 0 }
+  =
+    match t with
+      | Empty -> 0
+      | Node l _ r -> 1 + (size l) + (size r)
+    end
+    
+  (* Predicado que indica se um inteiro é elemento de uma árvore *)                     
+  predicate memt (t : tree int) (k : int) =
+    match t with
+      | Empty -> false
+      | Node t1 a t2 -> a = k \/ memt t1 k \/ memt t2 k
+    end
+
+  (* Predicado que verifica se todos os elementos de uma árvore são iguais ou inferiores
+     a um valor recebido *)
+  predicate leq_tree (x : int) (t : tree int) =
+    forall k: int. memt t k -> k <= x
+
+  (* Predicado que verifica se todos os elementos de uma árvore são iguais ou superiores
+     a um valor recebido *)
+  predicate geq_tree (x : int) (t : tree int) =
+    forall k: int. memt t k -> x <= k
+
+  (* Predicado que verifica se uma árvore está ordenada ou não *)
+  predicate sortedBT (t : tree int) =
+    match t with
+      | Empty -> true
+      | Node t1 a t2 -> sortedBT t1 /\ sortedBT t2 /\ leq_tree a t1 /\ geq_tree a t2
+    end
+
+  (* Função que retorna o número de ocorrências de um inteiro numa árvore *)
+  function num_occ_t (x: 'a) (t: tree 'a) : int =
+    match t with
+      | Empty -> 0
+      | Node t1 a t2 -> if (a = x) then 1 + (num_occ_t x t1) + (num_occ_t x t2) 
+                        else (num_occ_t x t1) + (num_occ_t x t2)
+    end
+
+  (* Função que adiciona um valor a uma árvore *)
+  let rec add (t : tree int) (v : int) : tree int
+    (* a árvore inicial deve estar ordenada *)
+    requires { sortedBT t }
+    (* a árvore final deve estar ordenada *)
+    ensures  { sortedBT result }
+    (* o tamanho da árvore final deverá ser igual ao tamanho inicial mais um *)
+    ensures  { size result = size t + 1 }
+    (* todos os elementos da árvore final deverão estar presentes na árvore inicial
+       ou ser o novo elemento inserido *)
+    ensures  { forall x: int. memt result x <-> (memt t x \/ x = v) }
+    (* o número de ocorrências de um elemento na árvore final deverá ser o mesmo que na árvore inicial,
+       a menos que esse elemento seja o elemento inserido, nesse caso, deverá haver mais uma ocorrência *)
+    ensures  { forall x: int. num_occ_t x result = if x = v then 1 + num_occ_t x t else num_occ_t x t }
+    (* o tamanho da árvore a verificar vai progressivamente diminuindo *)
+    variant  { size t }
+  =
+    match t with
+      (* no caso de chegarmos a um nó vazio, criamos um novo nodo em que o valor a inserir é a raiz *)
+      | Empty -> Node Empty v Empty
+      (* no caso do nó não ser vazio, adicionamos o valor ao nó da esquerda caso este seja inferior
+         ao valor na raiz, ou ao nó da direita, no caso de ser superior ao valor na raiz *)
+      | Node t1 x t2 -> if v <= x then Node (add t1 v) x t2 else Node t1 x (add t2 v)
+    end
+
+  (* Função que adiciona, de forma ordenada, os elementos de uma lista a uma árvore *)
+  let rec function inorderAux (t : tree int) (l : list int) : tree int
+    (* a árvore inicial deverá estar ordenada *)
+    requires { sortedBT t }
+    (* a árvore final deverá estar ordenada *)
+    ensures  { sortedBT result }
+    (* o número de ocorrências de um elemento na árvore final deverá ser igual à soma
+       do número de ocorrências na árvore inicial e na lista *)
+    ensures  { forall x: int. (num_occ_t x t) + (num_occ x l) = num_occ_t x result }
+    (* o tamanho da lista vai progressivamente diminuindo *)
+    variant  { length l }
+  =
+    match l with
+      (* no caso da lista estar vazia, devolve-se a árvore inicial *)
+      | Nil -> t
+      (* no caso da lista ainda ter elementos, adiciona-se a cabeça da lista à arvore inicial,
+         e chama-se a função recursivamente, utilizando a nova árvore e a cauda da lista *)
+      | Cons h l' -> inorderAux (add t h) l'
+    end
+
+  (* Função que cria uma árvore a partir de uma lista, através de inserções sucessivas *)
+  let function inorder (l : list int) : tree int
+    (* a árvore final deverá estar ordenada *)
+    ensures { sortedBT result }
+    (* o número de ocorrências de um elemento na lista deverá ser igual ao número de ocorrências na árvore *)
+    ensures { forall x: int. num_occ x l = num_occ_t x result }
+  =
+    inorderAux Empty l
+  
+  (* Função que devolve uma lista com todos os elementos da lista recebida inferiores ou iguais ao valor recebido *)
+  let rec function leq_list (x : int) (l : list int) : list int
+    (* todos os elementos da lista resultado são inferiores ou iguais ao valor recebido *)
+    ensures { forall k: int. mem k result -> k <= x }
+    (* o tamanho da lista resultado é inferior ou igual ao da lista inicial *)
+    ensures { length result <= length l }
+    (* o tamanho da lista vai progressivamente diminuindo *)
+    variant { length l }
+  =
+    match l with
+      | Nil -> Nil
+      | Cons h t -> if (x >= h) then Cons h (leq_list x t)
+                    else leq_list x t
+    end
+
+
+  (* Função que devolve uma lista com todos os elementos da lista recebida superiores ao valor recebido *)
+  let rec function g_list (x : int) (l : list int) : list int
+    (* todos os elementos da lista resultado são superiores ao valor recebido *)
+    ensures { forall k: int. mem k result -> x < k }
+    (* o tamanho da lista resultado é inferior ou igual ao da lista inicial *)
+    ensures { length result <= length l }
+    (* o tamanho da lista vai progressivamente diminuindo *)
+    variant { length l }
+  =
+    match l with
+      | Nil -> Nil
+      | Cons h t -> if (x < h) then Cons h (g_list x t)
+                    else g_list x t
+    end
+  
+  (* Função que divide uma lista em duas, tendo em conta um valor passado como argumento *)
+  let rec function partition (x : int) (l : list int) : (list int, list int)
+    (* se um elemento pertence à lista inicial, então deverá pertencer a uma das listas finais *)
+    ensures { let (t1, t2) = result in forall k: int. mem k l <-> (mem k t1 \/ mem k t2) }
+    (* se um elemento pertence à lista da esquerda, então deverá ser inferior ou igual ao elemento recebido como parâmetro *)
+    ensures { let (t1, t2) = result in forall k: int. mem k t1 -> k <= x }
+    (* se um elemento pertence à lista da direita, então deverá ser superior ao elemento recebido como parâmetro *)
+    ensures { let (t1, t2) = result in forall k: int. mem k t2 -> k > x }
+    (* o número de ocorrências de um elemento na lista inicial deverá ser igual à soma das suas ocorrências em ambas as sub listas *)
+    ensures { let (t1, t2) = result in forall k: int. num_occ k l = (num_occ k t1 + num_occ k t2) }
+    (* o comprimento da lista inicial é igual à soma dos comprimentos das duas sub listas *)
+    ensures { let (t1, t2) = result in length l = (length t1 + length t2) }
+    (* o comprimento da list vai progressivamente diminuindo *)
+    variant { length l }
+  =
+    match l with
+      | Nil -> (Nil, Nil)
+      | Cons h t -> let (t1, t2) = partition x t in if (x < h) then (t1, Cons h t2)
+                                                               else (Cons h t1, t2)
+    end
+  
+  (* Função que cria uma árvore através de uma lista, recorrendo a partições sucessivas *)
+  let rec function inorder2 (l : list int) : tree int
+    (* a árvore resultado estará ordenada *)
+    ensures { sortedBT result }
+    (* o número de ocorrências de um elemento na lista inicial é igual ao número de ocorrências na árvore resultado *)
+    ensures { forall x: int. num_occ x l = num_occ_t x result }
+    (* todos os elementos presentes na lista inicial estão presentes na árvore resultado *)
+    ensures { forall x: int. mem x l <-> memt result x }
+    (* o tamanho da lista vai progressivamente diminuindo *)
+    variant { length l }
+  =
+    match l with
+      (* caso a lista esteja vazia, a árvore resultado estará vazia também *)
+      | Nil -> Empty
+      (* caso a lista inicial não esteja vazia, então temos de a dividir em duas, utilizando a cabeça da lista para isso:
+         separa-se a cauda nos elementos inferiores ou iguais, e nos elementos superiores *)
+      | Cons h t ->
+        (* numa primeira fase utilizaram-se estas duas funções, mas tornou-se difícil a prova das condições utilizando-as *)
+        (*let t1 = leq_list h t in
+          let t2 = g_list h t in*)
+          (* acabou-se por usar uma função de partição convencional, já que a prova se tornava mais fácil *)
+          let (t1, t2) = partition h t in
+            Node (inorder2 t1) h (inorder2 t2)
+    end
+
+end

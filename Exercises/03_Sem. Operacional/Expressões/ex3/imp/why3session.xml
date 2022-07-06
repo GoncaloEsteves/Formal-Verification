@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Alt-Ergo" version="2.4.0" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="3" name="Z3" version="4.8.6" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml">
+<path name=".."/><path name="imp.why"/>
+<theory name="Exprs">
+ <goal name="Test13" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="4685"/></proof>
+ </goal>
+ <goal name="Test42" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="4873"/></proof>
+ </goal>
+ <goal name="Test55" proved="true">
+ <proof prover="0"><result status="valid" time="0.05" steps="5332"/></proof>
+ </goal>
+ <goal name="Test24" proved="true">
+ <proof prover="0"><result status="valid" time="0.12" steps="22696"/></proof>
+ </goal>
+ <goal name="Test0" proved="true">
+ <proof prover="0"><result status="valid" time="0.04" steps="5360"/></proof>
+ </goal>
+ <goal name="Test13r" proved="true">
+ <proof prover="0"><result status="valid" time="0.04" steps="5572"/></proof>
+ </goal>
+ <goal name="Test42r" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="5773"/></proof>
+ </goal>
+ <goal name="Test55r" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="Test55r.0" proved="true">
+  <transf name="assert" proved="true" arg1="(eval_expr_rel s (Evar x) s 42)">
+   <goal name="Test55r.0.0" expl="asserted formula" proved="true">
+   <proof prover="0"><result status="valid" time="0.08" steps="5773"/></proof>
+   </goal>
+   <goal name="Test55r.0.1" proved="true">
+   <transf name="assert" proved="true" arg1="(eval_expr_rel s (Econst 13) s 13)">
+    <goal name="Test55r.0.1.0" expl="asserted formula" proved="true">
+    <proof prover="0"><result status="valid" time="0.04" steps="5609"/></proof>
+    </goal>
+    <goal name="Test55r.0.1.1" proved="true">
+    <proof prover="0"><result status="valid" time="0.13" steps="9551"/></proof>
+    <proof prover="2" obsolete="true"><result status="valid" time="0.89" steps="6577"/></proof>
+    <proof prover="3" obsolete="true"><result status="timeout" time="1.00" steps="7487761"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="no_side_effects" proved="true">
+ <transf name="induction_pr" proved="true" >
+  <goal name="no_side_effects.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.04" steps="5338"/></proof>
+  </goal>
+  <goal name="no_side_effects.1" proved="true">
+  <proof prover="0"><result status="valid" time="0.06" steps="5309"/></proof>
+  </goal>
+  <goal name="no_side_effects.2" proved="true">
+  <proof prover="0"><result status="valid" time="0.06" steps="5911"/></proof>
+  </goal>
+  <goal name="no_side_effects.3" proved="true">
+  <proof prover="0"><result status="valid" time="0.05" steps="5869"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="expr_eval_left" proved="true">
+ <transf name="induction_pr" proved="true" >
+  <goal name="expr_eval_left.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="5741"/></proof>
+  </goal>
+  <goal name="expr_eval_left.1" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="5753"/></proof>
+  </goal>
+  <goal name="expr_eval_left.2" proved="true">
+  <proof prover="0"><result status="valid" time="0.06" steps="6683"/></proof>
+  </goal>
+  <goal name="expr_eval_left.3" proved="true">
+  <proof prover="0"><result status="valid" time="0.06" steps="6705"/></proof>
+  <proof prover="2" obsolete="true"><result status="valid" time="0.04" steps="379"/></proof>
+  <proof prover="3" obsolete="true"><result status="timeout" time="1.00" steps="1683930"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="expr_eval_right_econst" proved="true">
+ <proof prover="0"><result status="valid" time="0.03" steps="5851"/></proof>
+ </goal>
+ <goal name="expr_eval_right_evar" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="6488"/></proof>
+ </goal>
+ <goal name="expr_eval_right_ebin">
+ </goal>
+</theory>
+</file>
+</why3session>

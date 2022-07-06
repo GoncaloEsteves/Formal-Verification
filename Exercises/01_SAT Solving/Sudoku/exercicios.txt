@@ -1,0 +1,70 @@
+Exercicio 1 e 2 - Modele o problema do Sudoku (para N=2) como um problema SAT, escrevendo as restrições correspondentes às regras do puzzle.
+                  Acrescente depois as restrições correspondentes à definição de um tabuleiro concreto (por exemplo, o da figura).
+                - Converta as restrições geradas para CNF.
+
+    Para N = 2, serão necessárias 64 variáveis. Como tal, e por forma a simplificar, iremos considerar cada variável como sendo do tipo x(l, c, n), em que l é a linha e c a coluna onde a posição se insere na matriz, sendo n o número utilizado.
+    Por forma a modelar o problema, impõem-se as seguintes restrições.
+
+    - Cada posição da matriz deverá ter um número atribuído (N^4 cláusulas):
+        all l, c :: x(l, c, 1) \/ x(l, c, 2) \/ x(l, c, 3) \/ x(l, c, 4)
+
+    - Cada posição da matriz deverá ter no máximo um número atribuído (N^4 * (N^2*(N^2-1))/2 cláusulas):
+        all l, c :: (x(l, c, 1) -> -(x(l, c, 2) \/ x(l, c, 3) \/ x(l, c, 4))) /\
+                    (x(l, c, 2) -> -(x(l, c, 1) \/ x(l, c, 3) \/ x(l, c, 4))) /\
+                    (x(l, c, 3) -> -(x(l, c, 1) \/ x(l, c, 2) \/ x(l, c, 4))) /\
+                    (x(l, c, 4) -> -(x(l, c, 1) \/ x(l, c, 2) \/ x(l, c, 3)))
+    <=> all l, c :: (-x(l, c, 1) \/ -x(l, c, 2)) /\ (-x(l, c, 1) \/ -x(l, c, 3)) /\
+                    (-x(l, c, 1) \/ -x(l, c, 4)) /\ (-x(l, c, 2) \/ -x(l, c, 3)) /\
+                    (-x(l, c, 2) \/ -x(l, c, 4)) /\ (-x(l, c, 3) \/ -x(l, c, 4))
+    
+    - Cada linha da matriz tem de conter todos os números (N^4 cláusulas):
+        all l, n :: x(l, 1, n) \/ x(l, 2, n) \/ x(l, 3, n) \/ x(l, 4, n)
+
+    - Não podem haver números repetidos numa linha (N^4 * (N^2*(N^2-1))/2 cláusulas):
+        all l, n :: (x(l, 1, n) -> -(x(l, 2, n) \/ x(l, 3, n) \/ x(l, 4, n))) /\
+                    (x(l, 2, n) -> -(x(l, 1, n) \/ x(l, 3, n) \/ x(l, 4, n))) /\
+                    (x(l, 3, n) -> -(x(l, 1, n) \/ x(l, 2, n) \/ x(l, 4, n))) /\
+                    (x(l, 4, n) -> -(x(l, 1, n) \/ x(l, 2, n) \/ x(l, 3, n)))
+    <=> all l, n :: (-x(l, 1, n) \/ -x(l, 2, n)) /\ (-x(l, 1, n) \/ -x(l, 3, n)) /\
+                    (-x(l, 1, n) \/ -x(l, 4, n)) /\ (-x(l, 2, n) \/ -x(l, 3, n)) /\
+                    (-x(l, 2, n) \/ -x(l, 4, n)) /\ (-x(l, 3, n) \/ -x(l, 4, n))
+
+    - Cada coluna da matriz tem de conter todos os números (N^4 cláusulas):
+        all c, n :: x(1, c, n) \/ x(2, c, n) \/ x(3, c, n) \/ x(4, c, n)
+
+    - Não podem haver números repetidos numa coluna (N^4 * (N^2*(N^2-1))/2 cláusulas):
+        all c, n :: (x(1, c, n) -> -(x(2, c, n) \/ x(3, c, n) \/ x(4, c, n))) /\
+                    (x(2, c, n) -> -(x(1, c, n) \/ x(3, c, n) \/ x(4, c, n))) /\
+                    (x(3, c, n) -> -(x(1, c, n) \/ x(2, c, n) \/ x(4, c, n))) /\
+                    (x(4, c, n) -> -(x(1, c, n) \/ x(2, c, n) \/ x(3, c, n)))
+    <=> all c, n :: (-x(1, c, n) \/ -x(2, c, n)) /\ (-x(1, c, n) \/ -x(3, c, n)) /\
+                    (-x(1, c, n) \/ -x(4, c, n)) /\ (-x(2, c, n) \/ -x(3, c, n)) /\
+                    (-x(2, c, n) \/ -x(4, c, n)) /\ (-x(3, c, n) \/ -x(4, c, n))
+
+    - Cada submatriz tem de conter todos os números (N^4 cláusulas):
+        l, c pertencem a {1, 3}, all n :: x(l, c, n) \/ x(l+1, c, n) \/ x(l, c+1, n) \/ x(l+1, c+1, n)
+    
+    - Não podem haver números repetidos numa submatriz (N^4 * 2 cláusulas):
+        l, c pertencem a {1, 3}, all n :: (x(l,   c,   n) -> -(x(l+1, c, n) \/ x(l,   c+1, n) \/ x(l+1, c+1, n))) /\
+                                          (x(l+1, c,   n) -> -(x(l,   c, n) \/ x(l,   c+1, n) \/ x(l+1, c+1, n))) /\
+                                          (x(l,   c+1, n) -> -(x(l,   c, n) \/ x(l+1, c,   n) \/ x(l+1, c+1, n))) /\
+                                          (x(l+1, c+1, n) -> -(x(l,   c, n) \/ x(l+1, c,   n) \/ x(l,   c+1, n)))
+    <=> l, c pertencem a {1, 3}, all n :: (-x(l,   c, n) \/ -x(l+1, c,   n)) /\ (-x(l,   c,   n) \/ -x(l,   c+1, n)) /\
+                                          (-x(l,   c, n) \/ -x(l+1, c+1, n)) /\ (-x(l+1, c,   n) \/ -x(l,   c+1, n)) /\
+                                          (-x(l+1, c, n) \/ -x(l+1, c+1, n)) /\ (-x(l,   c+1, n) \/ -x(l+1, c+1, n))
+    <=> (retirar restrições repetidas, já impostas em cima)
+        l, c pertencem a {1, 3}, all n :: (-x(l,   c, n) \/ -x(l+1, c+1, n)) /\ (-x(l+1, c,   n) \/ -x(l,   c+1, n))
+
+
+    Por forma a responder ao problema apresentado em exemplo, devemos depois inserir também a seguinte restrição:
+        x(1, 1, 4) /\ x(2, 2, 2) /\ x(1, 3, 1) /\ x(3, 3, 3) /\ x(4, 2, 4) /\ x(4, 4, 1)
+
+Exercicio 3 - Resolva o problema usando um SAT solver.
+
+    Correndo o programa gerado por "sudoku.cpp", passando 2 como argumento, geramos o ficheiro "sudoku2.cnf", onde estão registadas todas as restrições necessárias para um tabuleiro de tamanho 2.
+
+    Em seguida, adicionamos a restrição imposta em cima, relativa aos valores já estabelecidos no exemplo, no ficheiro "sudoku2.cnf", da seguinte forma:
+        4 0 22 0 9 0 43 0 56 0 61 0
+
+    Deste modo, correndo o ficheiro CNF num SAT Solver, obtemos uma solução para o problema em exemplo, sendo apresentada uma possível resolução para o mesmo no ficheiro "sudoku2.out".
+    De realçar que a solução obtida é igual à apresentada no exemplo.

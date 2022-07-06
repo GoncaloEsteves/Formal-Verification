@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="1" name="Z3" version="4.8.6" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Alt-Ergo" version="2.3.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml">
+<path name=".."/><path name="projetoVF.why"/>
+<theory name="ExprAritmeticas">
+ <goal name="Con13" proved="true">
+ <proof prover="0"><result status="valid" time="0.05" steps="8842"/></proof>
+ </goal>
+ <goal name="Sim13" proved="true">
+ <proof prover="0"><result status="valid" time="0.03" steps="9774"/></proof>
+ </goal>
+ <goal name="Var13" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="9035"/></proof>
+ </goal>
+ <goal name="Adi11" proved="true">
+ <proof prover="0"><result status="valid" time="0.07" steps="10081"/></proof>
+ </goal>
+ <goal name="Mul24" proved="true">
+ <proof prover="0"><result status="valid" time="0.17" steps="24241"/></proof>
+ </goal>
+ <goal name="expr_eval">
+ <transf name="induction_ty_lex" >
+  <goal name="expr_eval.0">
+  <proof prover="0" obsolete="true"><result status="valid" time="0.28" steps="38954"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="MaqStack" proved="true">
+ <goal name="Push" proved="true">
+ <proof prover="0"><result status="valid" time="0.10" steps="15294"/></proof>
+ </goal>
+ <goal name="Load" proved="true">
+ <proof prover="0"><result status="valid" time="0.08" steps="14859"/></proof>
+ </goal>
+ <goal name="Sim" proved="true">
+ <proof prover="0"><result status="valid" time="0.12" steps="17327"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="2.00" steps="11345711"/></proof>
+ <proof prover="2" obsolete="true"><result status="highfailure" time="0.01"/></proof>
+ </goal>
+ <goal name="Plus" proved="true">
+ <proof prover="0"><result status="valid" time="0.10" steps="17942"/></proof>
+ </goal>
+ <goal name="Minus" proved="true">
+ <proof prover="0"><result status="valid" time="0.13" steps="17952"/></proof>
+ </goal>
+ <goal name="Mult" proved="true">
+ <proof prover="0"><result status="valid" time="0.32" steps="54449"/></proof>
+ <proof prover="1" obsolete="true"><result status="unknown" time="1.25" steps="1546672"/></proof>
+ <proof prover="2" obsolete="true"><result status="highfailure" time="0.00"/></proof>
+ </goal>
+ <goal name="Program" proved="true">
+ <proof prover="0"><result status="valid" time="0.66" steps="103206"/></proof>
+ </goal>
+</theory>
+</file>
+</why3session>

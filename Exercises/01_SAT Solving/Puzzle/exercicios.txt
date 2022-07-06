@@ -1,0 +1,73 @@
+Exercicio 1 - Por forma a codificar este puzzle como problema SAT, defina um conjunto adequado de variáveis proposicionais,
+              exprima as regras acima como fórmulas proposicionais, e converta essas fórmulas para CNF.
+    
+    Ser loiro = 1
+    Ir ao Sábado = 2
+    Ser adulto = 3
+    Usar chapéu = 4
+    Usar anel = 5
+    
+    – Os sócios loiros não podem ir ao Sábado.
+        1 -> -2
+    <=> -1 \/ -2
+
+    – Quem não for adulto tem que usar chapéu.
+        -3 -> 4
+    <=> 3 \/ 4
+
+    – Cada sócio usa anel ou não usa chapéu.
+        5 \/ -4
+
+    – Um sócio vai ao Sábado se e so se é adulto.
+        2 -> 3 /\ 3 -> 2
+    <=> (-2 \/ 3) /\ (-3 \/ 2)
+
+    – Todos os sócios adultos tem que usar anel.
+        3 -> 5
+    <=> -3 \/ 5
+
+    – Quem usa anel tem que ser loiro.
+        5 -> 1
+    <=> -5 \/ 1
+
+Exercicio 2 - Comprove, utilizando um SAT solver, que o problema é consistente.
+
+    Executando o ficheiro "puzzle.cnf" utilizando o MiniSat, o SAT solver indica-nos que o problema é satisfazível (SATISFIABLE) e, portanto, o problema é consistente.
+
+Exercicio 3 - Use agora o SAT solver para o ajudar a responder às seguintes questões.
+
+    (a) A afirmacão “Quem usa anel não pode ir ao Sábado.” é correcta?
+        
+        De modo a verificar se a afirmacão é correta, necessitamos de verificar se a negacão da mesma, quando no contexto do problema, origina um novo problema insatisfazível. Ou seja, se não há nenhum caso em que se verifique o oposto daquilo que pretendemos.
+
+        A afirmacão diz-nos que:
+            5 -> -2
+        <=> -5 \/ -2
+
+        Assim sendo, obtemos que a negacão é dada por:
+            -(-5 \/ -2)
+        <=> 5 /\ 2
+
+        Agora, adicionamos estas novas restrições ao ficheiro "puzzle.cnf", onde se encontra o problema representado.
+        Uma vez que a execucão do problema no MiniSat, com as novas restrições, indica que o problema é insatisfazível, podemos concluir que a afirmacão é correta.
+
+    (b) Pode um sócio de chapéu ser loiro?
+
+        Neste caso, apenas queremos verificar se existe alguma situacão em que um sócio poderá simultaneamente usar chapéu e ser loiro, ou seja:
+            4 /\ 1
+        
+        Assim, temos apenas de adicionar estas novas restrições ao problema original, e verificar a satisfabilidade do mesmo.
+        Após execução do problema no SAT Solver, obtemos que este é satisfazível, desde que o sócio seja loiro e use simultaneamente chapéu e anel.
+
+    (c) A afirmacão “Afinal a associacão não pode ter sócios adultos.” é correcta?
+
+        Mais uma vez, para verificar se esta afirmacão é correta, temos de confirmar que não existe caso algum em que ela não se verifique, ou seja, se a negacão da afirmacão, juntamente com a restante conjetura é tal que o problema se torna insatisfazível.
+
+        Esta afirmacão transmite-nos a seguinte ideia:
+            -3
+        
+        Ou seja, a negacão traduz-se em:
+            3
+        
+        Por forma a verificar a veracidade da afirmacão, deveremos agora adicionar esta expressao ao ficheiro "puzzle.cnf".
+        Verificamos que a execucão do problema no SAT Solver indica que o mesmo é insatisfazível e, como tal, a afirmação é verdadeira.

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="1" name="Z3" version="4.8.6" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Alt-Ergo" version="2.3.1" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml">
+<path name=".."/><path name="projetoVF.why"/>
+<theory name="ExprAritmeticas" proved="true">
+ <goal name="Vcon" proved="true">
+ <proof prover="0"><result status="valid" time="0.05" steps="8782"/></proof>
+ </goal>
+ <goal name="Vsim" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="9504"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="1.00" steps="1636760"/></proof>
+ <proof prover="2" obsolete="true"><result status="highfailure" time="0.00"/></proof>
+ </goal>
+ <goal name="Evar" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="8975"/></proof>
+ </goal>
+ <goal name="EBinAdi" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="9743"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="2.00" steps="3196274"/></proof>
+ <proof prover="2" obsolete="true"><result status="highfailure" time="0.00"/></proof>
+ </goal>
+ <goal name="EBinSub" proved="true">
+ <proof prover="0"><result status="valid" time="0.07" steps="9739"/></proof>
+ </goal>
+ <goal name="EBinMul" proved="true">
+ <proof prover="0"><result status="valid" time="0.17" steps="21617"/></proof>
+ </goal>
+ <goal name="func_rela_conc" proved="true">
+ <transf name="induction_ty_lex" proved="true" >
+  <goal name="func_rela_conc.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.33" steps="44911"/></proof>
+  <proof prover="1" obsolete="true"><result status="timeout" time="1.00" steps="1015937"/></proof>
+  <proof prover="2" obsolete="true"><result status="highfailure" time="0.01"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="MaqStack" proved="true">
+ <goal name="Push" proved="true">
+ <proof prover="0"><result status="valid" time="0.10" steps="15464"/></proof>
+ </goal>
+ <goal name="Load" proved="true">
+ <proof prover="0"><result status="valid" time="0.08" steps="15029"/></proof>
+ </goal>
+ <goal name="Sim" proved="true">
+ <proof prover="0"><result status="valid" time="0.08" steps="17390"/></proof>
+ <proof prover="1" obsolete="true"><result status="unknown" time="0.39" steps="560663"/></proof>
+ <proof prover="2" obsolete="true"><result status="highfailure" time="0.01"/></proof>
+ </goal>
+ <goal name="Plus" proved="true">
+ <proof prover="0"><result status="valid" time="0.10" steps="18574"/></proof>
+ </goal>
+ <goal name="Minus" proved="true">
+ <proof prover="0"><result status="valid" time="0.13" steps="18584"/></proof>
+ </goal>
+ <goal name="Mult" proved="true">
+ <proof prover="0"><result status="valid" time="0.56" steps="61835"/></proof>
+ <proof prover="1" obsolete="true"><result status="unknown" time="0.71" steps="1064620"/></proof>
+ <proof prover="2" obsolete="true"><result status="highfailure" time="0.00"/></proof>
+ </goal>
+ <goal name="Program" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="Program.0" proved="true">
+  <transf name="assert" proved="true" arg1="(execute s Nil (Cons (SPush 5) (Cons (SLoad &quot;x&quot;) (Cons SMult (Cons SSim Nil)))) = execute s (Cons 5 Nil) (Cons (SLoad &quot;x&quot;) (Cons SMult (Cons SSim Nil))))">
+   <goal name="Program.0.0" expl="asserted formula" proved="true">
+   <proof prover="0"><result status="valid" time="0.07" steps="14022"/></proof>
+   </goal>
+   <goal name="Program.0.1" proved="true">
+   <transf name="assert" proved="true" arg1="(execute s (Cons 5 Nil) (Cons (SLoad &quot;x&quot;) (Cons SMult (Cons SSim Nil))) = execute s (Cons 10 (Cons 5 Nil)) (Cons SMult (Cons SSim Nil)))">
+    <goal name="Program.0.1.0" expl="asserted formula" proved="true">
+    <proof prover="0"><result status="valid" time="0.07" steps="14265"/></proof>
+    </goal>
+    <goal name="Program.0.1.1" proved="true">
+    <proof prover="0"><result status="valid" time="0.48" steps="86145"/></proof>
+    </goal>
+   </transf>
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+<theory name="Compilador">
+ <goal name="CompVcon" proved="true">
+ <proof prover="0"><result status="valid" time="0.07" steps="16180"/></proof>
+ </goal>
+ <goal name="CompVsim" proved="true">
+ <proof prover="0"><result status="valid" time="0.12" steps="17964"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="1.00" steps="999784"/></proof>
+ <proof prover="2" obsolete="true"><result status="highfailure" time="0.00"/></proof>
+ </goal>
+ <goal name="CompEvar" proved="true">
+ <proof prover="0"><result status="valid" time="0.09" steps="16181"/></proof>
+ </goal>
+ <goal name="CompEbin" proved="true">
+ <proof prover="0"><result status="valid" time="0.44" steps="67296"/></proof>
+ <proof prover="1" obsolete="true"><result status="timeout" time="1.00" steps="1856562"/></proof>
+ <proof prover="2" obsolete="true"><result status="highfailure" time="0.00"/></proof>
+ </goal>
+ <goal name="comp_corr">
+ <transf name="induction_ty_lex" >
+  <goal name="comp_corr.0">
+  <transf name="split_vc" >
+   <goal name="comp_corr.0.0" proved="true">
+   <proof prover="0"><result status="valid" time="0.13" steps="20271"/></proof>
+   </goal>
+   <goal name="comp_corr.0.1">
+   </goal>
+   <goal name="comp_corr.0.2" proved="true">
+   <proof prover="0"><result status="valid" time="0.20" steps="20206"/></proof>
+   </goal>
+   <goal name="comp_corr.0.3">
+   </goal>
+  </transf>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

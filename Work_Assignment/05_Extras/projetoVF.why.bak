@@ -1,0 +1,432 @@
+(* ================================================== EXPRESSÕES ARITMÉTICAS ================================================== *)
+theory ExprAritmeticas
+
+  use map.Map
+  use map.Const
+  use int.Int
+  use string.String
+
+  (* ======================================================== TIPOS ======================================================== *)
+
+    (* Diferentes tipos de operadores binários. *)
+    type oper = Adi (* adição *)
+              | Sub (* subtração *)
+              | Mul (* multiplicação *)
+              | Igu (* igualdade *)
+              | Sup (* superior *)
+              | Inf (* inferio *)
+    
+    (* Diferentes tipos de combinadores lógicos. *)
+    type comb = Conj (* conjunção *)
+              | Disj (* disjunção *)
+    
+    (* Estado de um programa. *)
+    type estado = map string int
+    
+    (* Função que cria um estado inicial. *)
+    function init : estado = const 0
+    
+    (* Função que atualiza o valor de uma variável num dado estado. *)
+    function update (s: estado) (y: string) (n: int) : estado = set s y n
+
+    (* Diferentes tipos de expressões aritméticas. *)
+    type aexp = Vcon int            (* valores constantes *)
+              | Vsim aexp           (* valores simétricos *)
+              | Evar string         (* expressões variáveis *)
+              | Ebin aexp oper aexp (* expressões binárias *)
+              | Vneg aexp           (* negação de expressões *)
+              | Econ aexp aexp      (* conjunção de expressões *)
+              | Edis aexp aexp      (* disjunção de expressões *)
+
+  (* ======================================================= FUNÇÔES ======================================================= *)
+
+    (* Função que retorna o resultado obtido ao aplicar uma dada operação a dois valores. *)
+    function aeval_ebin (n1: int) (op: oper) (n2: int) : int =
+      (* Existem cinco tipos de operações diferentes: *)
+      match op with
+        (* Adição, onde se retorna a soma dos dois valores recebidos; *)
+        | Adi -> n1 + n2
+        (* Subtração, onde se retorna a diferença dos dois valores recebidos; *)
+        | Sub -> n1 - n2
+        (* Multiplicação, onde se retorna o produto dos dois valores recebidos; *)
+        | Mul -> n1 * n2
+        (* Igualdade, onde se retorna o valor comparação entre dois valores recebidos; *)
+        | Igu -> if (n1 = n2) then 1 else 0
+        (* Superioridade, onde se verifica se o valor da esquerda é superior do que o da direita; *)
+        | Sup -> if (n1 > n2) then 1 else 0
+        (* Inferioridade, onde se verifica se o valor da esquerda é inferior do que o da direita; *)
+        | Inf -> if (n1 < n2) then 1 else 0
+      end
+    
+    (* Função que retorna o resultado obtido ao aplicar um combinador lógico a dois valores. *)
+    function leval_ebin (n1: int) (c: comb) (n2: int) : int =
+      (* Existem dois tipos de combinadores diferentes: *)
+      match c with
+        (* o combinador é uma conjunção de expressões, e neste caso, retorna-se o valor da conjunção dos valores; *)
+        | Conj -> if (n1 = 0) then 0
+                  else if (n2 = 0) then 0
+                       else 1
+        (* o combinador é uma disjunção de expressões, e neste caso, retorna-se o valor da disjunção dos valores; *)
+        | Disj -> if (n1 <> 0) then 1
+                  else if (n2 <> 0) then 1
+                       else 0
+      end
+
+    (* Função que retorna o resultado obtido ao aplicar um combinador lógico a dois valores. *)
+    function leval_ebin2 (e1: aexp) (c: comb) (e2: aexp) (s: estado) : int =
+      (* Existem dois tipos de combinadores diferentes: *)
+      match c with
+        (* o combinador é uma conjunção de expressões, e neste caso, retorna-se o valor da conjunção dos valores; *)
+        | Conj -> if ((aeval e1 s) = 0) then 0
+                  else if ((aeval e2 s) = 0) then 0
+                       else 1
+        (* o combinador é uma disjunção de expressões, e neste caso, retorna-se o valor da disjunção dos valores; *)
+        | Disj -> if ((aeval e1 s) <> 0) then 1
+                  else if ((aeval e2 s) <> 0) then 1
+                       else 0
+      end
+      
+    (* Função que retorna o simétrico de um valor. *)
+    function simet (n: int) : int = -n
+    
+    (* Função que retorna a negação de um valor. *)
+    function neg (n: int) : int = if (n <> 0) then 0 else 1
+
+    (* Função que retorna o valor de uma dada expressão aritmética. *)
+    function aeval (e: aexp) (s: estado) : int =
+      (* Há três cenários possíveis: *)
+      match e with
+        (* a expressão é um valor constante, e neste caso, retorna-se o valor do mesmo; *)
+        | Vcon n        -> n
+        (* a expressão é um valor simétrico, e neste caso, retorna-se o simétrico do valor associado; *)
+        | Vsim ex       -> simet (aeval ex s)
+        (* a expressão é uma expressão variável, e neste caso, retorna-se o valor associado à mesma; *)
+        | Evar x        -> get s x
+        (* a expressão é uma expressão binária, e neste caso, retorna-se o resultado da mesma; *)
+        | Ebin e1 op e2 -> aeval_ebin (aeval e1 s) op (aeval e2 s)
+        (* a expressão é uma negação, e neste caso, retorna-se o valor oposto ao associado; *)
+        | Vneg ex       -> neg (aeval ex s)
+        (* a expressão é uma conjunção de expressões, e neste caso, retorna-se o valor da conjunção dos valores; *)
+        | Econ e1 e2    -> leval_ebin2 e1 Conj e2 s
+        (* a expressão é uma disjunção de expressões, e neste caso, retorna-se o valor da disjunção dos valores; *)
+        | Edis e1 e2    -> leval_ebin2 e1 Disj e2 s
+      end
+
+  (* ======================================================= RELAÇÔES ====================================================== *)
+
+    (* Predicado que determina se um dado valor é o resultado de uma expressão. *)
+    inductive aevalR aexp estado int =
+      (* No caso da expressão ser um valor constante, então o valor desta deverá ser igual ao valor recebido; *)
+      | vcon : forall s: estado, n: int. aevalR (Vcon n) s n
+      (* no caso da expressão ser um valor simétrico, então o valor desta deverá ser o simétrico do valor recebido; *)
+      | vsim : forall s: estado, e: aexp, n: int. (aevalR e s n) -> (aevalR (Vsim e) s (simet n))
+      (* no caso da expressão ser uma expressão variável, então o valor desta deverá ser igual ao valor associado à mesma. *)
+      | evar : forall s: estado, x: string. aevalR (Evar x) s (get s x)
+      (* no caso da expressão ser uma expressão binária, então o valor desta deverá ser igual ao valor recebido; *)
+      | ebin : forall e1 e2: aexp, op: oper, s: estado, n1 n2: int.
+        ((aevalR e1 s n1) /\ (aevalR e2 s n2)) -> (aevalR (Ebin e1 op e2) s (aeval_ebin n1 op n2))
+      (* no caso da expressão ser uma negação, então o valor desta deverá ser o oposto ao valor recebido; *)
+      | vneg : forall s: estado, e: aexp, n: int. (aevalR e s n) -> (aevalR (Vneg e) s (neg n))
+      (* no caso da expressão ser uma conjunção de expressões, então o valor desta deverá ser o da conjunção dos valores; *)
+      | econ : forall e1 e2: aexp, s: estado, n1 n2: int.
+        ((aevalR e1 s n1) /\ (aevalR e2 s n2)) -> (aevalR (Econ e1 e2) s (leval_ebin n1 Conj n2))
+      (* no caso da expressão ser uma disjunção de expressões, então o valor desta deverá ser o da disjunção dos valores; *)
+      | edis : forall e1 e2: aexp, s: estado, n1 n2: int.
+        ((aevalR e1 s n1) /\ (aevalR e2 s n2)) -> (aevalR (Edis e1 e2) s (leval_ebin n1 Disj n2))
+      
+
+  (* ======================================================== PROVAS ======================================================= *)
+
+    (* Verificar se as constantes estão a ser bem definidas. *)
+    goal Vcon :
+      let s = init in
+        aeval (Vcon 10) s = 10
+
+    (* Verificar se os simétricos estão a ser bem definidos. *)
+    goal Vsim :
+      let s = update init "x" 10 in
+        aeval (Vsim (Vcon 10)) s = -10
+
+    (* Verificar se as variáveis estão a ser bem definidas. *)
+    goal Evar :
+      let s = update init "x" 10 in
+          aeval (Evar "x") s = 10
+
+    (* Verificar se as expressões binárias estão a ser bem definidas. *)
+    goal EBinAdi :
+      let s = update init "y" 5  in
+        aeval (Ebin (Vcon 20) Adi (Vsim (Vcon 10))) s = 10
+
+    goal EBinSub :
+      let s = update init "aux" 1  in
+        aeval (Ebin (Vcon 20) Sub (Vsim (Vcon 10))) s = 30
+
+    goal EBinIgu :
+      let s = update init "aux" 1  in
+        aeval (Ebin (Evar "aux") Igu (Vcon 1)) s = 1
+
+    goal EBinSup :
+      let s = init  in
+        aeval (Ebin (Vcon 20) Sup (Vcon 30)) s = 0
+
+    goal EBinInf :
+      let s = init  in
+        aeval (Ebin (Vcon 20) Inf (Vcon 30)) s = 1
+  
+    (* Mais um teste sobre as expressões binárias, um pouco mais complexo. *)
+    goal EBinMul :
+      let s = update init "x" 10  in
+        aeval (Ebin (Vcon 20) Mul (Vsim (Vcon 10))) s = -200
+    
+    (* Verificar se a negação está a ser bem definida. *)
+    goal VNeg :
+        aeval (Vneg (Vcon 1)) init = 0
+    
+    (* Verificar se a conjunção está a ser bem definida. *)
+    goal Econ :
+        aeval (Econ (Vcon 4) (Vneg (Vcon 1))) init = 0
+    
+    (* Verificar se a disjunção está a ser bem definida. *)
+    goal Edis :
+        aeval (Edis (Vcon 4) (Vneg (Vcon 1))) init = 1
+
+    (* Prova que permitir concluir que as definições funcional e relacional estão em concordância. *)
+    lemma func_rela_conc:
+      forall e: aexp, s: estado, n: int. aevalR e s n <-> aeval e s = n
+end
+
+
+(* ===================================================== MÁQUINA DE STACK ===================================================== *)
+theory MaqStack
+
+  use map.Map
+  use map.Const
+  use int.Int
+  use string.String
+  use list.List
+  use list.HdTlNoOpt
+  use ExprAritmeticas
+
+  (* ======================================================== TIPOS ======================================================== *)
+  
+    (* Diferentes tipos de operações de stack. *)
+    type opstack = SPush int    (* colocar um valor no topo da stack *)
+                 | SLoad string (* colocar o valor associado a uma variável no topo da stack *)
+                 | SSim         (* trocar o valor no topo da stack pelo seu simétrico *)
+                 | SPlus        (* retira os dois valores no topo da stack, e substitui pela sua soma *)
+                 | SMinus       (* retira os dois valores no topo da stack, e substitui pela sua diferença *)
+                 | SMult        (* retira os dois valores no topo da stack, e substitui pelo seu produto *)
+                 | SIgu         (* retira os dois valores no topo da stack, e substitui pelo resultado da sua comparação *)
+                 | SSup         (* retira os dois valores no topo da stack, e substitui pelo resultado da sua comparação *)
+                 | SInf         (* retira os dois valores no topo da stack, e substitui pelo resultado da sua comparação *)
+                 | SNeg         (* trocar o valor no topo pela sua negação *)
+                 | SConj        (* retira os dois valores no topo da stack, e substitui pela sua conjunção *)
+                 | SDisj        (* retira os dois valores no topo da stack, e substitui pela sua disjunção *)
+    
+    (* Função que retorna o simétrico do elemento à cabeça de uma stack. *)
+    function simethd (st: list int) : int = simet (hd st)
+    
+    (* Função que retorna o oposto do elemento à cabeça de uma stack. *)
+    function neghd (st: list int) : int = neg (hd st)
+    
+    (* Função que retorna o segundo elemento a ser utilizado por uma operação binária. *)
+    function hdtl (st: list int) : int = hd (tl st)
+    
+    (* Função que retorna uma stack sem os dois primeiros elementos. *)
+    function tltl (st: list int) : (list int) = tl (tl st)
+
+  (* ======================================================= FUNÇÔES ======================================================= *)
+
+    (* Função que avalia programas em linguagem de máquina de stack.
+       A função altera uma stack recebida consoante as operações passadas. *)
+    function execute (s: estado) (st: list int) (p: list opstack) : (list int) =
+      (* O conjunto de operações poderá estar de duas formas: *)
+      match p with
+        (* caso não haja mais operações a executar, devolvemos o estado atual da stack; *)
+        | Nil      -> st
+        (* caso ainda haja operações, temos de verificar qual o tipo de operação que se segue *)
+        | Cons h t -> match h with
+          (* se for um push, inserimos o novo valor na stack; *)
+          | SPush n -> execute s (Cons n st) t
+          (* se for um load, inserimos o valor associado à variável na stack; *)
+          | SLoad x -> execute s (Cons (get s x) st) t
+          (* se for um sim, substituimos o valor à cabeça da stack pelo seu simétrico; *)
+          | SSim    -> execute s (Cons (simethd st) (tl st)) t
+          (* se for um plus, substituimos os dois primeiros valores pela sua soma; *)
+          | SPlus   -> execute s (Cons (aeval_ebin (hd st) Adi (hdtl st)) (tltl st)) t
+          (* se for um minus, substituimos os dois primeiros valores pela sua diferença; *)
+          | SMinus  -> execute s (Cons (aeval_ebin (hd st) Sub (hdtl st)) (tltl st)) t
+          (* se for um mult, substituimos os dois primeiros valores pelo seu produto; *)
+          | SMult   -> execute s (Cons (aeval_ebin (hd st) Mul (hdtl st)) (tltl st)) t
+          (* se for um mult, substituimos os dois primeiros valores pela sua comparação; *)
+          | SIgu    -> execute s (Cons (aeval_ebin (hd st) Igu (hdtl st)) (tltl st)) t
+          (* se for um mult, substituimos os dois primeiros valores pela sua comparação; *)
+          | SSup    -> execute s (Cons (aeval_ebin (hd st) Sup (hdtl st)) (tltl st)) t
+          (* se for um mult, substituimos os dois primeiros valores pela sua comparação; *)
+          | SInf    -> execute s (Cons (aeval_ebin (hd st) Inf (hdtl st)) (tltl st)) t
+          (* se for um neg, substituimos o valor à cabeça da stack pelo seu oposto; *)
+          | SNeg    -> execute s (Cons (neghd st) (tl st)) t
+          (* se for um conj, substituimos os dois primeiros valores pela sua conjunção; *)
+          | SConj   -> execute s (Cons (leval_ebin (hd st) Conj (hdtl st)) (tltl st)) t
+          (* se for um disj, substituimos os dois primeiros valores pela sua conjunção; *)
+          | SDisj   -> execute s (Cons (leval_ebin (hd st) Disj (hdtl st)) (tltl st)) t
+        end
+      end
+
+  (* ======================================================== PROVAS ======================================================= *)
+
+    (* Verificar se os push estão bem definidos. *)
+    goal Push :
+      let s = init in
+        execute s Nil (Cons (SPush 10) Nil) = (Cons 10 Nil)            
+    
+    (* Verificar se os load estão bem definidos. *)
+    goal Load :
+      let s = init in
+        let x = update s "x" 10 in
+        execute x Nil (Cons (SLoad "x") Nil) = (Cons 10 Nil)
+    
+    (* Verificar se os sim estão bem definidos. *)
+    goal Sim :
+      let s = init in
+        execute s Nil (Cons (SPush 10) (Cons SSim Nil)) = (Cons (-10) Nil)
+    
+    (* Verificar se os plus estão bem definidos. *)
+    goal Plus :
+      let s = init in
+        execute s (Cons 10 (Cons 20 Nil)) (Cons SPlus Nil) = (Cons 30 Nil)
+    
+    (* Verificar se os minus estão bem definidos. *)
+    goal Minus :
+      let s = init in
+        execute s (Cons 10 (Cons 20 Nil)) (Cons SMinus Nil) = (Cons (-10) Nil)
+    
+    (* Verificar se os mult estão bem definidos. *)
+    goal Mult :
+      let s = init in
+        execute s (Cons 10 (Cons 20 Nil)) (Cons SMult Nil) = (Cons 200 Nil)
+
+    (* Verificar se os igu estão bem definidos. *)
+    goal Igu :
+      let s = init in
+        execute s (Cons 10 (Cons 20 Nil)) (Cons SIgu Nil) = (Cons 0 Nil)
+        
+    (* Verificar se os igu estão bem definidos. *)
+    goal Sup :
+      let s = init in
+        execute s (Cons 10 (Cons 20 Nil)) (Cons SSup Nil) = (Cons 0 Nil)
+        
+    (* Verificar se os igu estão bem definidos. *)
+    goal Inf :
+      let s = init in
+        execute s (Cons 10 (Cons 20 Nil)) (Cons SInf Nil) = (Cons 1 Nil)
+    
+    (* Verificar se as neg estão bem definidas. *)
+    goal Neg :
+      execute init (Cons 0 Nil) (Cons SNeg Nil) = (Cons 1 Nil)
+    
+    (* Verificar se as conj estão bem definidas. *)
+    goal Conj :
+      execute init (Cons 10 (Cons 0 Nil)) (Cons SConj Nil) = (Cons 0 Nil)
+
+    (* Verificar se as disj estão bem definidas. *)
+    goal Disj :
+      execute init (Cons 10 (Cons 0 Nil)) (Cons SDisj Nil) = (Cons 1 Nil)
+    
+    (* Verificar a correção de um programa mais complexo *)
+    goal Program :
+      let s = update init "x" 10 in
+        execute s Nil (Cons (SPush 5) (Cons (SLoad "x") (Cons SMult (Cons SSim Nil)))) = (Cons (-50) Nil)
+
+end
+
+
+(* ======================================================== COMPILADOR ======================================================== *)
+theory Compilador
+
+  use map.Map
+  use map.Const
+  use string.String
+  use list.List
+  use list.Append
+  use int.Int
+  use ExprAritmeticas
+  use MaqStack
+
+
+  (* ======================================================= FUNÇÔES ======================================================= *)
+  
+  (* Função que, dado um operador binário, devolve a correspondente operação de máquina de stack. *)
+  function convert (o: oper) : opstack =
+    match o with
+      | Adi -> SPlus
+      | Sub -> SMinus
+      | Mul -> SMult
+      | Igu -> SIgu
+      | Sup -> SSup
+      | Inf -> SInf
+    end
+
+  (* Função que compila uma expressão aritmética, devolvendo o respetivo programa em máquina de stack. *)
+  function compile (e: aexp) : (list opstack) =
+    (* Há quatro tipos de expressões aritméticas diferentes: *)
+    match e with
+      (* caso se trate de um valor constante, vamos adicionar o seu valor à stack; *)
+      | Vcon n        -> Cons (SPush n) Nil
+      (* caso se trate de um valor simétrico, vamos adicionar a operação de simétrico após adicionar as operações relativas à expressão; *)
+      | Vsim ex       -> (compile ex) ++ (Cons SSim Nil)
+      (* caso se trate de uma expressão variável, vamos adicionar o valor a si associado à stack; *)
+      | Evar x        -> Cons (SLoad x) Nil
+      (* caso se trate de uma expressão binária, vamos primeiro tratar da sub-expressão da esquerda, seguida da sub-expressão da direita,
+         e depois iremos calcular a expressão em si. *)
+      | Ebin e1 op e2 -> (compile e1) ++ ((compile e2) ++ (Cons (convert op) Nil))
+      (* caso se trate de uma negação, vamos adicionar a operação de negação após adicionar as operações relativas à expressão; *)
+      | Vneg ex       -> (compile ex) ++ (Cons SNeg Nil)
+      (* caso se trate de uma conjunção, vamos primeiro tratar da sub-expressão da esquerda, seguida da sub-expressão da direita,
+         e depois iremos calcular a conjunção em si. *)
+      | Econ e1 e2    -> (compile e1) ++ ((compile e2) ++ (Cons SConj Nil))
+      (* caso se trate de uma disjunção, vamos primeiro tratar da sub-expressão da esquerda, seguida da sub-expressão da direita,
+         e depois iremos calcular a disjunção em si. *)
+      | Edis e1 e2    -> (compile e1) ++ ((compile e2) ++ (Cons SDisj Nil))
+    end
+
+  (* ======================================================== PROVAS ======================================================= *)
+  
+  (* Verificar se as conversão para constantes está correta. *)
+  goal CompVcon :
+    compile (Vcon 10) = Cons (SPush 10) Nil
+
+  (* Verificar se as conversão para simétricos está correta. *)
+  goal CompVsim :
+    compile (Vsim (Vcon 10)) = Cons (SPush 10) (Cons SSim Nil)
+  
+  (* Verificar se as conversão para variáveis está correta. *)
+  goal CompEvar :
+    compile (Evar "x") = Cons (SLoad "x") Nil
+  
+  (* Verificar se a conversão de expressões binárias está correta. *)
+  goal CompEbin :
+    compile (Ebin (Vcon 10) Adi (Vsim (Ebin (Vcon 5) Mul (Evar "x")))) =
+      (Cons (SPush 10) (Cons (SPush 5) (Cons (SLoad "x") (Cons SMult (Cons SSim (Cons SPlus Nil))))))
+
+  (* Verificar se as conversão para negações está correta. *)
+  goal CompVneg :
+    compile (Vneg (Vcon 10)) = Cons (SPush 10) (Cons SNeg Nil)
+  
+  (* Verificar se a conversão para as conjunções está correta. *)
+  goal CompEcon :
+    compile (Econ (Vcon 2) (Vcon 1)) = Cons (SPush 2) (Cons (SPush 1) (Cons SConj Nil))
+
+  (* Verificar se a conversão para as disjunções está correta. *)
+  goal CompEdis :
+    compile (Edis (Vcon 0) (Vcon 0)) = Cons (SPush 0) (Cons (SPush 0) (Cons SDisj Nil))
+
+  (* Verificar a correção do compilador. *)
+  lemma comp_corr_aux :
+    forall s: estado, e: aexp, st: list int, p: list opstack.
+      execute s st ((compile e) ++ p) = execute s (Cons (aeval e s) st) p
+  
+  lemma comp_corr :
+    forall s: estado, e: aexp. execute s Nil (compile e) = Cons (aeval e s) Nil
+  
+end

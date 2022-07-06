@@ -1,0 +1,160 @@
+theory Exprs
+
+  use map.Map
+  use map.Const
+  use int.Int
+  use int.EuclideanDivision 
+  
+  
+  (*---------------------------------------DEFINIÇÂO DOS TIPOS---------------------------------------*)
+
+  (* Identificadores *)
+  type ident
+  function mk_ident int : ident
+
+  (* Expressões *)
+  type operator = Oplus | Ominus | Omult | Odiv
+  type expr = Econst int
+            | Evar   ident
+            | Ebin   expr operator expr
+
+  (* Estados do programa *)
+  type state = map ident int
+
+
+  (*----------------------------DEFINIÇÂO DA FUNÇÂO QUE AVALIA EXPRESSÔES----------------------------*)
+
+  (* Função auxiliar que determina o valor de uma expressão *)
+  function eval_ebin (n1: int) (op: operator) (n2: int) : int =
+    (* Existem três possibilidades de operação *)
+    match op with
+      (* Adição, onde se retorna a soma dos dois valores recebidos *)
+      | Oplus  -> n1 + n2
+      (* Subtração, onde se retorna a diferença dos dois valores recebidos *)
+      | Ominus -> n1 - n2
+      (* Multiplicação, onde se retorna o produto dos dois valores recebidos *)
+      | Omult  -> n1 * n2
+      (* Divisão, onde se retorna o quociente dos dois valores recebidos *)
+      | Odiv   -> if (n2 = 0) then 0 else (div n1 n2)
+    end
+
+  (* Semânticas das expressões *)
+  function eval_expr (s: state) (e: expr) : int =
+    (* Há três cenários possíveis *)
+    match e with
+      (* a expressão é uma constante, e neste caso, retorna-se o valor da mesma *)
+      | Econst n        -> n
+      (* a expressão é uma variável, e neste caso, retorna-se o valor associado a ela *)
+      | Evar   x        -> get s x
+      (* a expressão é uma expressão binária, e neste caso, retorna-se o resultado da mesma *)
+      | Ebin   e1 op e2 -> eval_ebin (eval_expr s e1) op (eval_expr s e2)
+    end
+
+
+  (*--------------------------------------OBJETIVOS A VERIFICAR--------------------------------------*)
+
+  (* Verificar se as constantes estão a ser bem definidas. *)
+  goal Test13 :
+    let s = const 0 in
+      eval_expr s (Econst 13) = 13
+
+  (* Verificar se as variáveis estão a ser bem definidas. *)
+  goal Test42 :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 42 in
+        eval_expr s (Evar x) = 42
+
+  (* Verificar se as expressões binárias estão a ser bem definidas. *)
+  goal Test55 :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 42 in
+        eval_expr s (Ebin (Evar x) Oplus (Econst 13)) = 55
+  
+  (* Mais um teste sobre as expressões binárias, um pouco mais complexo. *)
+  goal Test24 :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 12 in
+        eval_expr s (Ebin (Ebin (Econst 20) Ominus (Evar x)) Odiv (Econst 4)) = 2
+
+  (* Confirmar se a divisão por zero está a ser bem tratada. *)
+   goal Test0 :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 12 in
+        eval_expr s (Ebin (Ebin (Econst 20) Ominus (Evar x)) Odiv (Econst 0)) = 0
+
+
+  (*----------------------DEFINIÇÂO DO PREDICADO INDUTIVO QUE AVALIA EXPRESSÔES----------------------*)
+
+  (* A semântica de expressões como relação de avaliação deve terminar sempre, e como tal,
+     foi escrita como função anteriormente, no entanto, pode ser escrita como um predicado indutivo. *)
+  inductive eval_expr_rel state expr state int =
+    (* A expressão é uma constante, e neste caso, o valor associado será igual ao da constante *)
+    | econst    : forall n: int, s: state.
+        eval_expr_rel s (Econst n) s n
+
+    (* A expressão é uma variável, e neste caso, o valor associado será o guardado na variável *)
+    | evar      : forall x: ident, s: state.
+        eval_expr_rel s (Evar   x) s (get s x)
+    
+    (* A expressão é uma expressão binária diferente da divisão, e neste caso, o valor associado será igual ao aplicar 
+       a operação aos valores associados às sub-expressões *)
+    | ebin   : forall e1 e2: expr, s s1 s2: state, op: operator, n1 n2: int.
+        ((op <> Odiv) /\ (eval_expr_rel s e1 s1 n1) /\ (eval_expr_rel s1 e2 s2 n2)) -> (eval_expr_rel s (Ebin e1 op e2) s2 (eval_ebin n1 op n2))
+
+    (* A expressão é uma divisão, e neste caso, o valor associado será igual à divisão de
+       dos valores associados às sub-expressões, sempre que o da expressão da direita seja diferente de 0 *)
+    | ebinodiv    : forall e1 e2: expr, s s1 s2: state, n n1 n2: int.
+        ((n2 <> 0) /\ (eval_expr_rel s e1 s1 n1) /\ (eval_expr_rel s1 e2 s2 n2)) -> (eval_expr_rel s (Ebin e1 Odiv e2) s2 (eval_ebin n1 op n2))
+
+
+  (*--------------------------------------OBJETIVOS A VERIFICAR--------------------------------------*)
+  
+  (* Verificar se as constantes estão a ser bem definidas. *)
+  goal Test13r :
+    let s = const 0 in
+      eval_expr_rel s (Econst 13) s 13
+
+  (* Verificar se as variáveis estão a ser bem definidas. *)
+  goal Test42r :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 42 in
+        eval_expr_rel s (Evar x) s 42
+
+  (* Verificar se as expressões binárias estão a ser bem definidas.
+     Não consegui provar a validade deste goal. *)
+  goal Test55r :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 42 in
+        eval_expr_rel s (Ebin (Evar x) Oplus (Econst 13)) s 55
+
+
+  (*----------------------------------------LEMMAS A VERIFICAR---------------------------------------*)
+
+  (* Caso dois estados s1 e s2 provem a validade de eval_expr_rel, então esses estados deverão ser iguais,
+     uma vez que a avaliação de expressões não altera o valor dos estados. Por forma a provar este lemma
+     é necessário executar um induction_pr. *)
+  lemma no_side_effects:
+    forall e: expr, s1 s2: state, n: int. eval_expr_rel s1 e s2 n -> s1 = s2
+
+  (* Para todas as expressões, caso se verifique a validade das mesmas recorrendo ao predicado indutivo,
+     deverá também verificar-se a validade recorrendo à função, sendo que o valor associado ao predicado
+     deverá ser igual ao retornado pela função. *)
+  lemma expr_eval_left:
+    forall s: state, e: expr, n: int. eval_expr_rel s e s n -> eval_expr s e = n
+  
+  (* Para todas as constantes, a validade da função implica a validade do predicado indutivo. *)
+  lemma expr_eval_right_econst:
+    forall s: state, x n: int. (eval_expr s (Econst x) = n) -> (eval_expr_rel s (Econst x) s n)
+    
+  (* Para todas as variáveis, a validade da função implica a validade do predicado indutivo. *)
+  lemma expr_eval_right_evar:
+    forall s: state, x: ident, n: int. (eval_expr s (Evar x) = n) -> (eval_expr_rel s (Evar x) s n)
+  
+  (* Para todas as operações, caso o seu resultado seja diferente de 0, bem como o resultado das suas
+     sub-expressões, então o predicado indutivo é válido. *)
+  lemma expr_eval_right_ebin:
+    forall s: state, op: operator, e1 e2: expr, n n1 n2: int.
+      ((n1 <> 0) /\ (n2 <> 0) /\ (eval_expr s e1 = n1) /\ (eval_expr s e2 = n2) /\ (eval_expr s (Ebin e1 op e2) = n))
+        -> (eval_expr_rel s (Ebin e1 op e2) s n)
+
+end

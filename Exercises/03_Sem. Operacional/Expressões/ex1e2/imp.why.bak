@@ -1,0 +1,135 @@
+theory Exprs
+
+  use map.Map
+  use map.Const
+  use int.Int
+  
+  
+  (*---------------------------------------DEFINIÇÂO DOS TIPOS---------------------------------------*)
+
+  (* Identificadores *)
+  type ident
+  function mk_ident int : ident
+
+  (* Expressões *)
+  type operator = Oplus | Ominus | Omult
+  type expr = Econst int
+            | Evar   ident
+            | Ebin   expr operator expr
+
+  (* Estados do programa *)
+  type state = map ident int
+
+
+  (*----------------------------DEFINIÇÂO DA FUNÇÂO QUE AVALIA EXPRESSÔES----------------------------*)
+  
+  (* Função auxiliar que determina o valor de uma expressão *)
+  function eval_ebin (n1: int) (op: operator) (n2: int) : int =
+    (* Existem três possibilidades de operação *)
+    match op with
+      (* Adição, onde se retorna a soma dos dois valores recebidos *)
+      | Oplus  -> n1 + n2
+      (* Subtração, onde se retorna a diferença dos dois valores recebidos *)
+      | Ominus -> n1 - n2
+      (* Multiplicação, onde se retorna o produto dos dois valores recebidos *)
+      | Omult  -> n1 * n2
+    end
+
+  (* Semânticas das expressões *)
+  function eval_expr (s:state) (e:expr) : int =
+    (* Há três cenários possíveis *)
+    match e with
+      (* a expressão é uma constante, e neste caso, retorna-se o valor da mesma *)
+      | Econst n        -> n
+      (* a expressão é uma variável, e neste caso, retorna-se o valor associado a ela *)
+      | Evar   x        -> get s x
+      (* a expressão é uma expressão binária, e neste caso, retorna-se o resultado da mesma *)
+      | Ebin   e1 op e2 -> eval_ebin (eval_expr s e1) op (eval_expr s e2)
+    end
+
+
+  (*--------------------------------------OBJETIVOS A VERIFICAR--------------------------------------*)
+
+  (* Verificar se as constantes estão a ser bem definidas *)
+  goal Test13 :
+    let s = const 0 in
+      eval_expr s (Econst 13) = 13
+
+  (* Verificar se as variáveis estão a ser bem definidas*)
+  goal Test42 :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 42 in
+        eval_expr s (Evar x) = 42
+
+  (* Verificar se as expressões binárias estão a ser bem definidas *)
+  goal Test55 :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 42 in
+        eval_expr s (Ebin (Evar x) Oplus (Econst 13)) = 55
+  
+  (* Mais um teste sobre as expressões binárias, um pouco mais complexo *)
+  goal Test24 :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 12 in
+        eval_expr s (Ebin (Ebin (Econst 20) Ominus (Evar x)) Omult (Econst 3)) = 24
+
+
+  (*----------------------DEFINIÇÂO DO PREDICADO INDUTIVO QUE AVALIA EXPRESSÔES----------------------*)
+
+  (* A semântica de expressões como relação de avaliação deve terminar sempre, e como tal,
+     foi escrita como função anteriormente, no entanto, pode ser escrita como um predicado indutivo. *)
+  inductive eval_expr_rel state expr state int =
+    (* A expressão é uma constante, e neste caso, o valor associado será igual ao da constante *)
+    | econst : forall n: int, s: state.
+        eval_expr_rel s (Econst n) s n
+
+    (* A expressão é uma variável, e neste caso, o valor associado será o guardado na variável *)
+    | evar   : forall x: ident, s: state.
+        eval_expr_rel s (Evar   x) s (get s x)
+    
+    (* A expressão é uma expressão binária, e neste caso, o valor associado será igual ao aplicar 
+       a operação aos valores associados às sub-expressões *)
+    | ebin   : forall e1 e2: expr, s s1 s2: state, op: operator, n1 n2: int.
+        ((eval_expr_rel s e1 s1 n1) /\ (eval_expr_rel s1 e2 s2 n2)) -> (eval_expr_rel s (Ebin e1 op e2) s2 (eval_ebin n1 op n2))
+
+
+  (*--------------------------------------OBJETIVOS A VERIFICAR--------------------------------------*)
+
+  (* Verificar se as constantes estão a ser bem definidas. *)
+  goal Test13r :
+    let s = const 0 in
+      eval_expr_rel s (Econst 13) s 13
+
+  (* Verificar se as variáveis estão a ser bem definidas. *)
+  goal Test42r :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 42 in
+        eval_expr_rel s (Evar x) s 42
+
+  (* Verificar se as expressões binárias estão a ser bem definidas. *)
+  goal Test55r :
+    let x = mk_ident 0 in
+      let s = set (const 0) x 42 in
+        eval_expr_rel s (Ebin (Evar x) Oplus (Econst 13)) s 55
+
+
+  (*----------------------------------------LEMMAS A VERIFICAR---------------------------------------*)
+
+  (* Caso dois estados s1 e s2 provem a validade de eval_expr_rel, então esses estados deverão ser iguais,
+     uma vez que a avaliação de expressões não altera o valor dos estados. Por forma a provar este lemma
+     é necessário executar um induction_pr. *)
+  lemma no_side_effects:
+    forall e: expr, s1 s2: state, n: int. eval_expr_rel s1 e s2 n -> s1 = s2
+
+  (* Por forma a provarmos a validade do seguinte lemma, poderemos seguir duas estratégias distintas:
+       - a forma mais fácil, que apenas implica o uso do comando induction_ty_lex, tornando a prova imediata;
+       - a aplicação de um split_all_full, que devide a equivalência em duas implicações, seguida do comando 
+         induction_pr na implicação 'da esquerda para a direita' e do comando induction_ty_lex na outra implicação;
+     
+     De realçar que por forma a tornar a prova possível foi necessário definir a função eval_ebin e utiliza-la em 
+     eval_expr_rel, de modo a reduzir o número de cláusulas do predicado de 5 para 3 e permitindo que a prova fosse
+     executada dentro do tempo previsto. *)
+  lemma expr_eval:
+    forall e: expr, s: state, n: int. eval_expr_rel s e s n <-> eval_expr s e = n
+
+end

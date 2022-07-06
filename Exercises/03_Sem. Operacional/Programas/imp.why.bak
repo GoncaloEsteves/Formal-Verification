@@ -1,0 +1,170 @@
+theory Exprs
+
+  use map.Map
+  use map.Const
+  use int.Int
+  
+  
+  (*---------------------------------------DEFINIÇÂO DOS TIPOS---------------------------------------*)
+
+  (* Identificadores *)
+  type ident
+  function mk_ident int : ident
+
+  (* Expressões *)
+  type operator = Oplus | Ominus | Omult | Ogt | Olt | Oeq
+  type expr = Econst int
+            | Evar   ident
+            | Ebin   expr operator expr
+
+  (* Estados do programa *)
+  type state = map ident int
+
+
+  (*----------------------------DEFINIÇÂO DA FUNÇÂO QUE AVALIA EXPRESSÔES----------------------------*)
+
+  (* Semânticas das expressões *)
+  function eval_expr (s:state) (e:expr) : int =
+    (* Há três cenários possíveis *)
+    match e with
+      (* a expressão é uma constante, e neste caso, retorna-se o valor da mesma *)
+      | Econst n        -> n
+      (* a expressão é uma variável, e neste caso, retorna-se o valor associado a ela *)
+      | Evar   x        -> get s x
+      (* a expressão é uma expressão binária, e neste caso, observam-se três possibilidades  *)
+      | Ebin   e1 op e2 ->
+        match op with
+          (* o operador utilizado é a adição, e neste caso retorna-se a adição das duas expressões associadas *)
+          | Oplus  -> eval_expr s e1 + eval_expr s e2
+          (* o operador utilizado é a subtração, e neste caso retorna-se a subtração das duas expressões associadas *)
+          | Ominus -> eval_expr s e1 - eval_expr s e2
+          (* o operador utilizado é a multiplicação, e neste caso retorna-se a multiplicação das duas expressões associadas *)
+          | Omult  -> eval_expr s e1 * eval_expr s e2
+          (* o operador utilizado é a comparação, e neste caso retorna-se 1 caso o primeiro elemento seja superior e 0 caso contrário *)
+          | Ogt    -> if ((eval_expr s e1) > (eval_expr s e2)) then 1 else 0
+          (* o operador utilizado é a comparação, e neste caso retorna-se 1 caso o primeiro elemento seja inferior e 0 caso contrário *)
+          | Olt    -> if ((eval_expr s e1) < (eval_expr s e2)) then 1 else 0
+          (* o operador utilizado é a comparação, e neste caso retorna-se 1 caso o primeiro elemento seja igual ao segundo e 0 caso contrário *)
+          | Oeq    -> if ((eval_expr s e1) = (eval_expr s e2)) then 1 else 0
+        end
+    end
+
+end
+
+
+
+theory Programs
+
+  use map.Map 
+  use map.Const
+  use Exprs
+
+
+  (*---------------------------------------DEFINIÇÂO DOS TIPOS---------------------------------------*)
+
+  (* Declarações *)
+  type stmt =
+    | Sskip
+    | Sassign ident expr
+    | Sseq stmt stmt
+    | Sif expr stmt stmt
+    | Swhile expr stmt
+
+
+  (*----------------------DEFINIÇÂO DO PREDICADO INDUTIVO QUE AVALIA PROGRAMAS-----------------------*)
+
+  (* Semântica de linguagens (predicado big step) *)
+    inductive big_step state stmt state =
+      (* a instrução utilizada é uma instrução de passagem sem alteração *)
+      | big_step_skip:    forall s1 s2: state.
+          (s1 = s2) -> big_step s1 Sskip s2
+      (* a instrução utilizada é uma instrução de atribuição *)
+      | big_step_assign:  forall s1 s2: state, e: expr, x: ident.
+          (s2 = set s1 x (eval_expr s1 e)) -> big_step s1 (Sassign x e) s2
+      (* a instrução utilizada é uma instrução de sequenciação *)
+      | big_step_seq:     forall s1 s2 s3: state, i1 i2: stmt.
+          (big_step s1 i1 s2 /\ big_step s2 i2 s3) -> big_step s1 (Sseq i1 i2) s3
+      (* a instrução utilizada é um controlo condicional verdadeiro *)
+      | big_step_if_t:    forall s1 s2: state, e: expr, st1 st2: stmt.
+          (((eval_expr s1 e) <> 0) /\ (big_step s1 st1 s2)) -> big_step s1 (Sif e st1 st2) s2
+      (* a instrução utilizada é um controlo condicional falso *)
+      | big_step_if_f:    forall s1 s2: state, e: expr, st1 st2: stmt.
+          (((eval_expr s1 e) = 0) /\ (big_step s1 st2 s2)) -> big_step s1 (Sif e st1 st2) s2
+      (* a instrução utilizada é um ciclo cujo controlo dá verdadeiro *)
+      | big_step_while_t: forall s1 s2 s3: state, e: expr, st: stmt.
+          (((eval_expr s1 e) <> 0) /\ (big_step s1 st s2) /\ (big_step s2 (Swhile e st) s3)) -> big_step s1 (Swhile e st) s3
+      (* a instrução utilizada é um ciclo cujo controlo dá falso *)
+      | big_step_while_f: forall s1 s2: state, e: expr, st: stmt.
+          (((eval_expr s1 e) = 0) /\ (s1 = s2)) -> big_step s1 (Swhile e st) s2
+
+
+  (*--------------------------------------OBJETIVOS A VERIFICAR--------------------------------------*)
+  
+  (* Verificar se as atribuições estão a ser bem feitas. *)
+  goal Assign42 :
+    let x = mk_ident 0 in
+      let s = const 0 in
+        forall s': state.
+          big_step s (Sassign x (Econst 42)) s' -> get s' x = 42
+
+  (* Verificar se a sequencialização de ações está a ser bem feita. *)
+  goal Seq:
+    let s = const 0 in
+      forall x1 x2: ident, s1: state.
+        big_step s
+          (
+            Sseq (Sassign x1 (Econst 13))
+                 (Sassign x2 (Econst 42))
+          )
+          s1 ->
+            exists s2: state. big_step s (Sassign x1 (Econst 13)) s2 /\ big_step s2 (Sassign x2 (Econst 42)) s1 ->
+              ((get s1 x1 = 13) /\ (get s1 x2 = 42))
+
+  (* Verificar se os controlos condicionais estão a ser bem feitos. *)
+  goal If42:
+    let x = mk_ident 0 in
+      let s = set (const 0) x 0 in
+        forall s1: state, i: stmt.
+          big_step s
+            (
+              Sif (Evar x)
+                  (Sassign x (Econst 13))
+                  (Sassign x (Econst 42))
+            )
+	          s1 -> 
+	            get s1 x = 42
+
+  goal If13:
+    let x = mk_ident 0 in
+      let s = set (const 0) x 1 in
+        forall s1: state, i: stmt.
+          big_step s
+            (
+              Sif (Evar x)
+                  (Sassign x (Econst 13))
+                  (Sassign x (Econst 42))
+            )
+	          s1 -> 
+	            get s1 x = 13
+
+  (* Verificar se os ciclos estão a ser bem feitos.
+     (Tive dificuldades em provar este objetivo, devido à necessidade
+      da existência de estados intermédios) *)
+  goal While:
+    let x = mk_ident 0 in
+      let s = const 0 in
+        forall s1: state.
+          big_step s
+            (
+              Swhile (Ebin (Evar x) Olt (Econst 5))
+                     (Sassign x (Ebin (Evar x) Oplus (Econst 1)))
+            )
+          s1 ->
+            get s1 x = 5
+  
+  (* Verificar se, para qualquer caso, apenas se verifica a existência de um estado final possível. *)
+  goal big_step_determinism:
+    forall s s': state, i : stmt.
+      big_step s i s'  ->  forall s'': state. big_step s i s''  -> s' = s''
+
+end

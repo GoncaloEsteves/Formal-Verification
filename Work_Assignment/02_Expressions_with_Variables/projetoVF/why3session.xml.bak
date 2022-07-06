@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml">
+<path name=".."/><path name="projetoVF.why"/>
+<theory name="ExprAritmeticas">
+ <goal name="Con13" proved="true">
+ <proof prover="0"><result status="valid" time="0.05" steps="8744"/></proof>
+ </goal>
+ <goal name="Sim13">
+ <proof prover="0" obsolete="true"><result status="valid" time="0.03" steps="9774"/></proof>
+ </goal>
+ <goal name="Var13" proved="true">
+ <proof prover="0"><result status="valid" time="0.06" steps="8937"/></proof>
+ </goal>
+ <goal name="Adi11">
+ <proof prover="0" obsolete="true"><result status="valid" time="0.07" steps="10081"/></proof>
+ </goal>
+ <goal name="Mul24" proved="true">
+ <proof prover="0"><result status="valid" time="0.17" steps="24147"/></proof>
+ </goal>
+ <goal name="expr_eval" proved="true">
+ <transf name="induction_ty_lex" proved="true" >
+  <goal name="expr_eval.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.28" steps="38954"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

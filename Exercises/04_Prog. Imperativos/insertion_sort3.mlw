@@ -1,0 +1,58 @@
+module InsertionSort
+
+  use int.Int
+  use ref.Ref
+  use array.Array
+  use array.IntArraySorted
+  use array.ArrayPermut
+  use array.ArrayEq
+
+
+  let swap (a: array int) (i: int) (j: int)
+    requires { 0 <= i < length a /\ 0 <= j < length a }
+    ensures  { exchange (old a) a i j }
+  =
+    let v = a[i] in
+      a[i] <- a[j];
+      a[j] <- v
+  
+
+  let insertion_sort3 (a: array int)
+    (* No final da execução da função, queremos garantir que o array *)
+    (* está ordenado *)
+    ensures { sorted a }
+    (* e é uma permutação do array original *)
+    ensures { permut_all (old a) a }
+  =
+    (* Percorremos todos os elementos do array a partir do segundo. *)
+    for i = 1 to length a - 1 do
+      (* Tanto no início como no fim de cada iteração do ciclo, devemos garantir que *)
+      (* o sub-array compreendido entre as posições 0 e i está ordenado; *)
+      invariant { sorted_sub a 0 i }
+      (* o array encontra-se num estado tal que o descreve como uma permutação do array inicial. *)
+      invariant { permut_all (old a) a }
+        let j = ref i in
+          (* Percorrendo os elementos entre i e 1, vamos efetuando trocas de tal forma que *)
+          while !j > 0 && a[!j - 1] > a[!j] do
+            (* em cada iteração do ciclo, tanto no início como no fim, garantimos que *)
+            (* o valor de j se encontra entre 0 e i, inclusive; *)
+            invariant { 0 <= !j <= i }
+            (* todos os valores à esquerda de j são inferiores aos valores da direita *)
+            invariant { forall k1 k2: int. 0 <= k1 < !j+1 <= k2 < i+1 -> a[k1] <= a[k2] }
+            (* o array encontra-se num estado tal que o descreve como uma permutação do array inicial; *)
+            invariant { permut_all (old a) a }
+            (* o sub-array compreendido entre 0 e j está ordenado; *)
+            invariant { sorted_sub a 0 !j }
+            (* o sub-array compreendido entre j e i está ordenado. *)
+            invariant { sorted_sub a !j (i+1) }
+            (* o valor de j está sempre a decrescer *)
+            variant   { !j }
+
+              (* a troca é sempre efetuada, já que a condição do ciclo garante que o valor
+                 em j-1 é inferior ao valor em j *)
+              swap a (!j-1) !j;
+              j := !j - 1
+          done
+    done
+
+end

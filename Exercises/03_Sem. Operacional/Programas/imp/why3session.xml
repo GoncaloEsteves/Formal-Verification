@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE why3session PUBLIC "-//Why3//proof session v5//EN"
+"http://why3.lri.fr/why3session.dtd">
+<why3session shape_version="6">
+<prover id="0" name="CVC4" version="1.7" timelimit="1" steplimit="0" memlimit="1000"/>
+<prover id="2" name="Z3" version="4.8.6" timelimit="1" steplimit="0" memlimit="1000"/>
+<file format="whyml">
+<path name=".."/><path name="imp.why"/>
+<theory name="Programs">
+ <goal name="Assign42" proved="true">
+ <proof prover="0"><result status="valid" time="0.09" steps="9563"/></proof>
+ </goal>
+ <goal name="Seq" proved="true">
+ <transf name="split_vc" proved="true" >
+  <goal name="Seq.0" proved="true">
+  <proof prover="0"><result status="timeout" time="1.00" steps="203054"/></proof>
+  <proof prover="2"><result status="valid" time="0.16" steps="313288"/></proof>
+  </goal>
+ </transf>
+ </goal>
+ <goal name="If42" proved="true">
+ <proof prover="0"><result status="valid" time="0.13" steps="14946"/></proof>
+ </goal>
+ <goal name="If13" proved="true">
+ <proof prover="0"><result status="valid" time="0.19" steps="27422"/></proof>
+ </goal>
+ <goal name="While">
+ </goal>
+ <goal name="big_step_determinism" proved="true">
+ <transf name="induction_pr" proved="true" >
+  <goal name="big_step_determinism.0" proved="true">
+  <proof prover="0"><result status="valid" time="0.09" steps="8548"/></proof>
+  </goal>
+  <goal name="big_step_determinism.1" proved="true">
+  <proof prover="0"><result status="valid" time="0.10" steps="9940"/></proof>
+  </goal>
+  <goal name="big_step_determinism.2" proved="true">
+  <proof prover="0"><result status="valid" time="0.10" steps="10949"/></proof>
+  </goal>
+  <goal name="big_step_determinism.3" proved="true">
+  <proof prover="0"><result status="valid" time="0.10" steps="10167"/></proof>
+  </goal>
+  <goal name="big_step_determinism.4" proved="true">
+  <proof prover="0"><result status="valid" time="0.09" steps="10031"/></proof>
+  </goal>
+  <goal name="big_step_determinism.5" proved="true">
+  <proof prover="0"><result status="valid" time="0.07" steps="11288"/></proof>
+  </goal>
+  <goal name="big_step_determinism.6" proved="true">
+  <proof prover="0"><result status="valid" time="0.08" steps="8958"/></proof>
+  </goal>
+ </transf>
+ </goal>
+</theory>
+</file>
+</why3session>

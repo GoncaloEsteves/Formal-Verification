@@ -1,0 +1,37 @@
+c Os socios loiros nao podem ir ao Sabado.
+c    -1 \/ -2
+
+c Quem nao for adulto tem que usar chapeu.
+c     3 \/  4
+
+c Cada socio usa anel ou nao usa chapeu.
+c     5 \/ -4
+
+c Um socio vai ao Sabado se e so se e adulto.
+c   (-2 \/  3) /\ (-3 \/ 2)
+
+c Todos os socios adultos tem que usar anel.
+c    -3 \/  5
+
+c Quem usa anel tem que ser loiro.
+c    -5 \/  1
+
+p cnf 5 7
+-1 -2 0
+ 3  4 0
+ 5 -4 0
+-2  3 0
+-3  2 0
+-3  5 0
+-5  1 0
+
+c Exercicio 3 - (a) A afirmacao “Quem usa anel nao pode ir ao Sabado.” e correcta?
+c 5 0
+c 2 0
+
+c Exercicio 3 - (b) Pode um socio de chapeu ser loiro?
+c 4 0
+c 1 0
+
+c Exercicio 3 - (c) A afirmacao “Afinal a associacao nao pode ter socios adultos.” e correcta?
+3 0

@@ -1,0 +1,79 @@
+theory ExprAritmeticas
+
+  use int.Int
+
+  (* ======================================================== TIPOS ======================================================== *)
+
+    (* Diferentes tipos de operadores binários. *)
+    type oper = Adi (* adição *)
+              | Sub (* subtração *)
+              | Mul (* multiplicação *)
+
+    (* Diferentes tipos de expressões aritméticas. *)
+    type aexp = Vcon int            (* valores constantes *)
+              | Vsim aexp           (* valores simétricos *)
+              | Ebin aexp oper aexp (* expressões binárias *)
+
+  (* ======================================================= FUNÇÔES ======================================================= *)
+
+    (* Função que retorna o resultado obtido ao aplicar uma dada operação a dois valores. *)
+    function aeval_ebin (n1: int) (op: oper) (n2: int) : int =
+      (* Existem três tipos de operações diferentes: *)
+      match op with
+        (* Adição, onde se retorna a soma dos dois valores recebidos; *)
+        | Adi -> n1 + n2
+        (* Subtração, onde se retorna a diferença dos dois valores recebidos; *)
+        | Sub -> n1 - n2
+        (* Multiplicação, onde se retorna o produto dos dois valores recebidos. *)
+        | Mul -> n1 * n2
+      end
+
+    (* Função que retorna o simétrico de um valor *)
+    function simet (n: int) : int = n
+
+    (* Função que retorna o valor de uma dada expressão aritmética. *)
+    function aeval (e: aexp) : int =
+      (* Há três cenários possíveis: *)
+      match e with
+        (* a expressão é um valor constante, e neste caso, retorna-se o valor do mesmo; *)
+        | Vcon n        -> n
+        (* a expressão é um valor simétrico, e neste caso, retorna-se o simétrico do valor associado; *)
+        | Vsim e        -> simet (aeval e)
+        (* a expressão é uma expressão binária, e neste caso, retorna-se o resultado da mesma. *)
+        | Ebin e1 op e2 -> aeval_ebin (aeval e1) op (aeval e2)
+      end
+
+  (* ======================================================= RELAÇÔES ====================================================== *)
+
+    (* Predicado que determina se um dado valor é o resultado de uma expressão. *)
+    inductive aevalR aexp int =
+      (* No caso da expressão ser um valor constante, então o valor desta deverá ser igual ao valor recebido; *)
+      | con : forall n: int. aevalR (Vcon n) n
+      (* no caso da expressão ser um valor simétrico, então o valor desta deverá ser o simétrico do valor recebido; *)
+      | sim : forall e: aexp, n: int. (aevalR e n) -> (aevalR (Vsim e) (simet n))
+      (* no caso da expressão ser uma expressão binária, então o valor desta deverá ser igual ao valor recebido. *)
+      | bin : forall e1 e2: aexp, op: oper, n1 n2: int.
+        ((aevalR e1 n1) /\ (aevalR e2 n2)) -> (aevalR (Ebin e1 op e2) (aeval_ebin n1 op n2))
+
+  (* ======================================================== PROVAS ======================================================= *)
+
+    (* Verificar se as constantes estão a ser bem definidas. *)
+    goal Con13 :
+      aeval (Vcon 13) = 13
+
+    (* Verificar se os simétricos estão a ser bem definidos. *)
+    goal Sim13 :
+      aeval (Vsim (Vcon 13)) = -13
+
+    (* Verificar se as expressões binárias estão a ser bem definidas. *)
+    goal Adi11 :
+      aeval (Ebin (Vcon 24) Adi (Vsim (Vcon 13))) = 11
+  
+    (* Mais um teste sobre as expressões binárias, um pouco mais complexo. *)
+    goal Mul24 :
+      aeval (Ebin (Ebin (Vcon 20) Sub (Vcon 12)) Mul (Vcon 3)) = 24
+
+    (* Prova que permitir concluir que as definições funcional e relacional estão em concordância. *)
+    lemma expr_eval:
+      forall e: aexp, n: int. aevalR e n <-> aeval e = n
+end

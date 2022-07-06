@@ -1,0 +1,68 @@
+module SelectionSort
+       
+  use int.Int
+  use ref.Ref
+  use array.Array
+  use array.IntArraySorted
+  use array.ArrayPermut
+  use array.ArrayEq
+  
+  
+  let swap (a: array int) (i: int) (j: int)
+    requires { 0 <= i < length a /\ 0 <= j < length a }
+    ensures  { exchange (old a) a i j }
+  =
+    let v = a[i] in
+      a[i] <- a[j];
+      a[j] <- v
+
+
+  let selection_sort2 (a: array int)
+    (* O array final deverá *)
+    (* estar ordenado *)
+    ensures { sorted a }
+    (* e corresponder a uma permutação do array inicial. *)
+    ensures { permut_all (old a) a }
+  =
+    for i = 0 to length a - 1 do
+      (* Tanto no início como no fim de uma iteração do ciclo espera se que *)
+      (* o sub-array compreendido entre a posição 0 e a posição i (não incluída) esteja ordenado; *)
+      invariant { sorted_sub a 0 i }
+      (* todos os valores do array antes de i sejam inferiores ou iguais aos que estão 'para lá' de i, inclusive; *)
+      invariant { forall k1 k2: int. 0 <= k1 < i <= k2 < length a -> a[k1] <= a[k2] }
+      (* o array deverá ser uma permutação do array inicial. *)
+      invariant { permut_all (old a) a }
+
+        let min = ref i in
+          for j = i + 1 to length a - 1 do
+            (* De modo a calcular a posição onde se encontra o novo mínimo, devemos garantir que *)
+            (* esta nunca supera os limites onde está a ser calculada *)
+            invariant { i <= !min < j }
+            (* e que para qualquer posição já percorrida, o valor do array nessa posição deverá ser
+               superior ou igual ao valor do array em min *)
+            invariant { forall k: int. i <= k < j -> a[!min] <= a[k] }
+
+              (* Caso o valor na posição a analisar seja inferior ao valor guardado em min,
+                 atribui-se um novo valor a min, igual ao da posição a analisar. *)
+              if a[j] < a[!min] then min := j
+          done;
+
+          (* Caso o valor guardado na posição min seja inferior ao guardado na posição atual,
+             procede-se à troca dos dois valores. *)
+          if a[!min] < a[i] then swap a i !min 
+    done
+  
+  (* Caso retiremos apenas primeira pós-condição, que garante que o array final está ordenado,
+     continuamos a conseguir provar a validade da função, sendo que o mesmo se verifica até com
+     a remoção do invariante de ciclo que garante a ordenação de todos os sub-arrays de 0 a i. *)
+  
+  (* Ao remover apenas segunda pós-condição, que garante que o array final é uma permutação do
+     array inicial, também conseguimos continuar a provar a validade da função, e isto mantém-se
+     até com a remoção do invariante de ciclo que garante que o array é sempre uma permutação
+     do array inicial.*)
+     
+  (* Se removermos as duas pós-condições em simultâneo, também conseguimos continuar a provar
+     a validade da função, no entanto, se removermos os dois invariantes previamente referidos
+     em simultâneo deixamos de conseguir provar que a função é válida, mesmo mantendo as pós-condições.*)
+  
+end
